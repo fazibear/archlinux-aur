@@ -1,0 +1,34 @@
+# Contributor: FaziBear <fazibear@gmail.com>
+
+pkgname="jruby"
+pkgver=1.3.1
+pkgrel=1
+pkgdesc="JRuby is an 100% pure-Java implementation of the Ruby programming language."
+arch=('i686' 'x86_64')
+url="http://jruby.codehaus.org/"
+license="CPL/GPL/LGPL"
+depends=(jre)
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+groups=()
+options=(!strip)
+install=()
+source=("http://dist.codehaus.org/$pkgname/$pkgver/$pkgname-bin-$pkgver.tar.gz" 'jruby.sh')
+noextract=()
+md5sums=('4a95db8fc93ed7219663fbede98b6117' 'a29e92de5b503fe9c237c27bde56359a')
+
+_bin_prefix='j'
+_bin_regex='[^j_.]*'
+
+build() {
+  mkdir $startdir/pkg/opt
+  mv $startdir/src/$pkgname-$pkgver $startdir/pkg/opt/$pkgname
+  install -D -m755 $startdir/src/jruby.sh $startdir/pkg/etc/profile.d/jruby.sh
+  cd $startdir/pkg/opt/$pkgname/bin
+  for _bin_file in `find -maxdepth 1 -name "${_bin_regex}" -printf "%P "`; do
+    mv ${_bin_file} ${_bin_prefix}${_bin_file}
+  done
+}

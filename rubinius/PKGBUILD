@@ -1,0 +1,69 @@
+# Contributor: v01d <phreakuencies@gmail.com>
+pkgname=rubinius-git
+pkgver=20080612
+pkgrel=1
+pkgdesc="A virtual machine for running Ruby programs and a Ruby core library"
+arch=(i686)
+url="http://rubini.us/"
+license=('custom')
+makedepends=('git')
+#depends=(gcc gmake pkg-config libtool ruby zip)
+#source=("http://rubyforge.org/frs/download.php/38084/ruby-enterprise-${pkgver}-${_pkgver}.tar.gz")
+#md5sums=('17e3c52e73e42809f57ad0000a6cb4ab')
+
+_gitroot="git://git.rubini.us/code"
+_gitname="code"
+
+build() {
+   cd $startdir/src
+   
+   msg "Connecting to git.rubini.us GIT server...."
+   
+   if [ -d $startdir/src/$_gitname ] ; then
+     cd $_gitname && git-pull origin
+     msg "The local files are updated."
+   else
+     git clone $_gitroot
+   fi
+ 
+   msg "GIT checkout done or server timeout"
+   msg "Starting make..."
+
+   cp -r $startdir/src/$_gitname $startdir/src/$_gitname-build
+   cd $startdir/src/$_gitname-build
+
+   rake build
+
+   cd shotgun
+
+   make DESTDIR="$startdir/pkg" install
+
+   return 1
+  
+  cd "${startdir}/src/ruby-enterprise-${pkgver}-${_pkgver}/source/vendor/google-perftools-0.97"
+  ./configure --disable-dependency-tracking
+  make libtcmalloc_minimal.la || return 1
+  install -d ${startdir}/pkg/opt/rubyee/lib/
+  cp .libs/libtcmalloc_minimal.so* ${startdir}/pkg/opt/rubyee/lib/
+
+  cd "${startdir}/src/ruby-enterprise-${pkgver}-${_pkgver}/source/"
+  ./configure --enable-shared --enable-pthread --prefix=/opt/rubyee
+  make EXTLIBS="-Wl,-rpath,${startdir}/pkg/opt/rubyee/lib/ -L${startdir}/pkg/opt/rubyee/lib/ -ltcmalloc_minimal"
+  make DESTDIR="$startdir/pkg" install
+  
+  install -d $startdir/pkg/usr/bin
+  for binary in erb gem irb rake rdoc ri ruby; do
+    ln -sf /opt/rubyee/bin/${binary} ${startdir}/pkg/usr/bin/${binary}ee
+  done
+
+  cd "${startdir}/src/ruby-enterprise-${pkgver}-${_pkgver}/rubygems"
+  ${startdir}/pkg/opt/rubyee/bin/ruby setup.rb --prefix=${startdir}/pkg/opt/rubyee/lib/ruby/1.8 --no-ri --no-rdoc
+  
+  cp -r ${startdir}/pkg/opt/rubyee/lib/ruby/1.8/lib/* ${startdir}/pkg/opt/rubyee/lib/ruby/1.8/
+  rm -rf ${startdir}/pkg/opt/rubyee/lib/ruby/1.8/lib
+  
+  cp -r ${startdir}/pkg/opt/rubyee/lib/ruby/1.8/bin ${startdir}/pkg/opt/rubyee/
+  rm -rf ${startdir}/pkg/opt/rubyee/lib/ruby/1.8/bin
+}
+
+# vim:set ts=2 sw=2 et:
