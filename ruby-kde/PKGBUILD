@@ -1,0 +1,30 @@
+# Maintainer: Douglas Soares de Andrade <dsandrade@gmail.com>
+arch=(i686)
+pkgname=ruby-kde
+pkgver=3.5.5
+pkgrel=1
+pkgdesc="Ruby bindings for the KDE."
+url="http://rubyforge.org/projects/korundum/"
+depends=('ruby' 'kdelibs')
+source=(http://rubyforge.rubyuser.de/korundum/korundum-$pkgver.tgz)
+conflicts=('kdebindings' 'ruby-qt')
+replaces=('ruby-qt')
+
+#md5sums=('ea4854deb876295e378f33abfdbcc0af')
+
+build() {
+  cd $startdir/src/korundum-$pkgver/
+
+  make -f Makefile.cvs
+  ./configure --prefix=/usr --with-qt-includes=/opt/qt/include #--enable-qscintilla=yes
+
+  # Solving a libtool problem
+  #sed -i "s#-version-info 3:4:92 ##" smoke/qt/Makefile
+
+  make || return 1
+  make DESTDIR=$startdir/pkg install
+
+  # Remove the .la files
+  find $startdir/pkg -name '*.la' -exec rm -f {} \;
+}
+

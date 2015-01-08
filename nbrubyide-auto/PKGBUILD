@@ -1,0 +1,28 @@
+# Contributor: FaziBear <fazibear@gmail.com>
+
+pkgname="netbeans-rubyide-hudson"
+
+HUDSON_URL="http://deadlock.netbeans.org/hudson"
+HUDSON_JOB="ruby"
+HUDSON_LAST_SUCCESSFUL_BUILD_NUMBER_URL="$HUDSON_URL/job/$HUDSON_JOB/lastSuccessfulBuild/buildNumber"
+HUDSON_LAST_BUILD=`wget -q -O - "$HUDSON_LAST_SUCCESSFUL_BUILD_NUMBER_URL"`
+HUDSON_LAST_BUILD_URL="$HUDSON_URL/job/$HUDSON_JOB/lastSuccessfulBuild/artifact/ruby/rubyide/dist/$pkgname-$HUDSON_LAST_BUILD.zip"
+
+pkgver=$HUDSON_LAST_BUILD
+pkgrel=1
+pkgdesc="Hudson latest build of complete Ruby-only IDE based on Netbeans"
+arch=('i686')
+url="http://wiki.netbeans.org/wiki/view/Ruby"
+license=('CDDL')
+depends=('jre')
+makedepends=('')
+install=()
+source=($HUDSON_LAST_BUILD_URL "nbrubyide.sh")
+md5sums=('' '77e5761be24eca6694b585169672d476')
+         
+build() {
+  cd $startdir/src
+  mkdir $startdir/pkg/opt
+  mv nbrubyide $startdir/pkg/opt/nbrubyide
+  install -D -m 755 $startdir/src/nbrubyide.sh $startdir/pkg/etc/profile.d/nbrubyide.sh 
+}

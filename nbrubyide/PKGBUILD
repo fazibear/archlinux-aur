@@ -1,0 +1,31 @@
+# Contributor: FaziBear <fazibear@gmail.com>
+
+_hudson_url="http://deadlock.netbeans.org/hudson"
+_hudson_job="ruby"
+
+pkgname="netbeans-rubyide-hudson"
+pkgver=3085
+pkgrel=1
+pkgdesc="Hudson latest build of complete Ruby-only IDE based on Netbeans"
+arch=('i686')
+url="http://wiki.netbeans.org/wiki/view/Ruby"
+license=('CDDL')
+depends=('jre')
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+groups=()
+options=()
+install=()
+source=("$_hudson_url/job/$_hudson_job/lastSuccessfulBuild/artifact/ruby/rubyide/dist/$pkgname-$pkgver.zip" 'nbrubyide.sh')
+noextract=()
+md5sums=('' '77e5761be24eca6694b585169672d476')
+         
+build() {
+  cd $startdir/src
+  mkdir $startdir/pkg/opt
+  mv nbrubyide $startdir/pkg/opt/nbrubyide
+  install -D -m 755 $startdir/src/nbrubyide.sh $startdir/pkg/etc/profile.d/nbrubyide.sh 
+}
